@@ -7,7 +7,7 @@ on:
       - main
     # This will only trigger on the first push (which includes the "Initial commit")
     paths-ignore:
-      - '**/*'
+      - '**'
 
 jobs:
   cleanup:
