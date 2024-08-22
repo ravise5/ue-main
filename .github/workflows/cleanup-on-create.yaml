@@ -1,25 +1,35 @@
-# This workflow will run on the first push to the main branch and clean up
-# all files that are not strictly required to build an AEM Live project.
-# This includes this particular workflow file.
+# This workflow will run upon repository creation and clean up
+# all files that are not strictly required to build an AEM Live project
+# but that we use to develop the project template. This includes this
+# particular workflow file.
 on:
-  push:
+  create:
     branches:
       - main
-
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       actions: write
-    if: ${{ github.event.head_commit.message == 'Initial commit' }}
+    # only run if commit message is "Initial commit" on main branch
+    if: ${{ github.event_name == 'workflow_dispatch' || ( github.ref == 'refs/heads/main' && !(contains(github.event, 'head_commit') || github.event.head_commit.message == 'Initial commit' )) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug GitHub Variables
+        run: |
+          echo "GITHUB_EVENT_NAME: ${{ github.event_name }}"
+          echo "GITHUB_REF: ${{ github.ref }}"
+          echo "GITHUB_EVENT: ${{ toJson(github.event) }}"
+          echo "GITHUB_REPOSITORY: ${{ github.repository }}"
+
       - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Remove Helper Files
         run: |
           rm -rf \
@@ -47,12 +57,12 @@ jobs:
         run: |
           sed -i.bak "s/{repo}/$(basename ${{ github.repository }})/g" README.md
           sed -i.bak "s/{owner}/$(dirname ${{ github.repository }})/g" README.md
+
       - name: Initialize Pull Request Template
         run: |
           sed -i.bak "s/aem-boilerplate-forms/$(basename ${{ github.repository }})/g" .github/pull_request_template.md
           sed -i.bak "s/adobe-rnd/$(dirname ${{ github.repository }})/g" .github/pull_request_template.md
 
-        # commit back to the repository
       - name: Commit changes
         run: |
           git config --local user.email "helix@adobe.com"
@@ -60,7 +70,3 @@ jobs:
           git add .
           git commit -m "chore: cleanup repository template"
           git push
-          
-      - name: Delete This Workflow
-        run: |
-          rm -f .github/workflows/cleanup-on-create.yaml
