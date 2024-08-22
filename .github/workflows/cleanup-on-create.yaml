@@ -5,9 +5,6 @@ on:
   push:
     branches:
       - main
-    # This will only trigger on the first push (which includes the "Initial commit")
-    paths-ignore:
-      - '**'
 
 jobs:
   cleanup:
@@ -63,3 +60,7 @@ jobs:
           git add .
           git commit -m "chore: cleanup repository template"
           git push
+          
+      - name: Delete This Workflow
+        run: |
+          rm -f .github/workflows/cleanup-on-create.yaml
