@@ -3,7 +3,7 @@
 # but that we use to develop the project template. This includes this
 # particular workflow file.
 on:
-  create:
+  push:
     branches:
       - main
   workflow_dispatch:
