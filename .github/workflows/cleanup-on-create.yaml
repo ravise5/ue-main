@@ -7,6 +7,8 @@ on:
     branches:
       - main
   workflow_dispatch:
+  repository_dispatch:
+    types: [template_used]
 jobs:
   cleanup:
     runs-on: ubuntu-latest
